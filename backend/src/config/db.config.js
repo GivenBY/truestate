@@ -8,6 +8,7 @@ const dbConfig = {
   USER: process.env.DB_USER || "postgres",
   PASSWORD: process.env.DB_PASSWORD || "password",
   DB: process.env.DB_NAME || "truestate_sales_db",
+  PORT: process.env.DB_PORT || "5432",
   dialect: "postgres",
   pool: {
     max: 5,
@@ -18,10 +19,19 @@ const dbConfig = {
   logging: false,
 };
 
-const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
-  host: dbConfig.HOST,
+// Use connection URI format for better DNS handling
+const connectionString = `postgresql://${dbConfig.USER}:${dbConfig.PASSWORD}@${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`;
+
+const sequelize = new Sequelize(connectionString, {
   dialect: dbConfig.dialect,
   pool: dbConfig.pool,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
+  logging: false,
 });
 
 const connectDB = async () => {
